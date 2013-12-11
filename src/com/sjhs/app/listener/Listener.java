@@ -56,7 +56,7 @@ public class Listener implements ServletContextListener {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				key = rs.getString(1);
-				value = rs.getString(2);
+				value = rs.getString(2); 
 				config.put(key, value);
 			}
 		} catch (Exception e) {
