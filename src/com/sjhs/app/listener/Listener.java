@@ -21,7 +21,7 @@ import com.sjhs.app.Scheduler.SurveyTaskWeek2and3;
 import com.sjhs.app.dbconnection.DBConnection;
 /**
  * @author Divya Prakash
- * 
+ * adding text for commit testing.
  */
 public class Listener implements ServletContextListener {
 	Map<String, String> config = new HashMap<String, String>();
