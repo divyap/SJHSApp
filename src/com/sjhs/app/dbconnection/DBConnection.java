@@ -2,30 +2,78 @@ package com.sjhs.app.dbconnection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+import javax.servlet.ServletContext;
+import javax.ws.rs.GET;
+import javax.ws.rs.core.Context;
 
 public class DBConnection {
-
+	
+	public DBConnection(){
+		System.out.println("Constructor " + context); // null here
+	}
+	
 	private Connection conn = null;
-
-	public static final String USER_NAME = "azsqladmin";
-
-	public static final String PASSWORD = "passSys0!";
-
+	private ServletContext context;
+	
+	public static final String USER_NAME = "sqlSSRS";
+	//public static String USER_NAME = null;
+	
+	public static final String PASSWORD = "$$r5sa";
+	//public static String PASSWORD = null ;
+	
 	public static final String DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	//public static String DRIVER = null;
+	
+	public static final String URL = "jdbc:sqlserver://scrdcvamgdat02:1433;databaseName=";
+	//public static String URL = null;
+	
+	public static final String DB_NAME = "sjhsSSRS";
+	//public static String DB_NAME = null;
+	
+	@Context
+	public void setServletContext(ServletContext context) {
+        System.out.println("servlet context set here");
+        this.context = context;
+        System.out.println(context.getInitParameter("jdbc.user"));
+    }
+	
+	/*
+	@GET
+	private void setDBProperties() {
+		setServletContext(context);
+		System.out.println(context);
+		USER_NAME = context.getInitParameter("jdbc.user");
+		PASSWORD = context.getInitParameter("jdbc.password");
+		DRIVER = context.getInitParameter("jdbc.driver");
+		URL = context.getInitParameter("jdbc.url");
+		DB_NAME = context.getInitParameter("jdbc.database");
 
-	public static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=azViews";
+       //get the property value and print it out
+        System.out.println(USER_NAME);
+        System.out.println(PASSWORD);
+        System.out.println(DRIVER);
 
-	public static final String DB_NAME = "azViews";
-
+	}
+*/
+	 	
 	public Connection getDBConnection() {
-
+		// read properties and set the database parameters
+		//setDBProperties();
 		try {
+
 			Class.forName(DRIVER);
 			//String url = URL + DB_NAME;
-			String url = URL;
+			String url = URL + DB_NAME;
 			conn = (Connection) DriverManager.getConnection(url, USER_NAME,	PASSWORD);
-
+			System.out.println("Created new connection..." + conn);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -35,7 +83,29 @@ public class DBConnection {
 	public void closeConnection() {
 		try {
 			conn.close();
+			System.out.println("Connection is closed..." + conn);
 		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		try {
+			String sql = "SELECT top 10 * FROM sjhsSSRS.dbo.SSRS_CPT_Dictionary";
+			String key;
+
+			DBConnection myDB = new DBConnection();
+			Connection conn = myDB.getDBConnection();
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				key = rs.getString(1);
+				System.out.println("Intitution==>" + key);
+			}
+			
+			myDB.closeConnection();
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

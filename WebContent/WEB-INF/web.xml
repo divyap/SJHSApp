@@ -5,6 +5,26 @@
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
+  <context-param>
+    <param-name>jdbc.driver</param-name>
+    <param-value>com.microsoft.sqlserver.jdbc.SQLServerDriver</param-value>
+  </context-param>
+  <context-param>
+    <param-name>jdbc.url</param-name>
+    <param-value>jdbc:sqlserver://scrdcpamgdat02:1433;databaseName=</param-value>
+  </context-param>
+  <context-param>
+    <param-name>jdbc.user</param-name>
+    <param-value>sqlSSRS</param-value>
+  </context-param>
+  <context-param>
+    <param-name>jdbc.password</param-name>
+    <param-value>$$r5sa</param-value>
+  </context-param>
+    <context-param>
+    <param-name>jdbc.database</param-name>
+    <param-value>sjhsSSRS</param-value>
+  </context-param>
   <listener>
     <listener-class>com.sjhs.app.listener.Listener</listener-class>
   </listener>
