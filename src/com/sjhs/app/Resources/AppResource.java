@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Hashtable;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -23,6 +24,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import com.sjhs.app.dbconnection.DBConnection;
+import javax.naming.*;
+import javax.naming.directory.*;
 
 /**
  * @author Divya Prakash
@@ -36,8 +39,43 @@ public class AppResource {
 	public static final String SURVEYB = "SurveyB";
 	public static final String SURVEYA_REM = "SurveyA Rem";
 
+	
 	@GET
 	@Path("/login")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getUserSession(@QueryParam("userid") String userid) {
+
+		try
+	    {
+	        // Set up the environment for creating the initial context
+	        Hashtable<String, String> env = new Hashtable<String, String>();
+	        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+	        env.put(Context.PROVIDER_URL, "ldap://ldap_server:389");
+	        // 
+	        env.put(Context.SECURITY_AUTHENTICATION, "simple");
+	        env.put(Context.SECURITY_PRINCIPAL, "domain\\user"); //we have 2 \\ because it's a escape char
+	        env.put(Context.SECURITY_CREDENTIALS, "test");
+	
+	        // Create the initial context
+	
+	        DirContext ctx = new InitialDirContext(env);
+	        boolean result = ctx != null;
+	
+	        if(ctx != null)
+	            ctx.close();
+	
+	        return "true";
+	    }
+	    catch (Exception e)
+	    {           
+	        return "false";
+	    }
+	}
+	
+	
+	/*
+	@GET
+	@Path("/loginold")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getUserSession(@QueryParam("userid") String userid) {
 		System.out.println(userid);
@@ -60,6 +98,8 @@ public class AppResource {
 		}
 
 	}
+	
+	*/
 
 	@POST
 	@Path("/submitAnswers")
