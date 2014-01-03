@@ -13,7 +13,8 @@ import java.util.Timer;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import com.sjhs.app.Resources.SurveyResource;
+import com.sjhs.app.Resources.AppResource;
+import com.sjhs.app.Resources.AppResource;
 import com.sjhs.app.Scheduler.SurveyTask1;
 import com.sjhs.app.Scheduler.SurveyTask2;
 import com.sjhs.app.Scheduler.SurveyTaskWeek2and3;
@@ -34,12 +35,12 @@ public class Listener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent arg0) {
 		System.out.println("Context Initialised");
 
-		initConfiguration();
+		//initConfiguration();
 
-		scheduleWeek1();
-		scheduleWeek2();
-		scheduleWeek3();
-		scheduleWeek4();
+		//scheduleWeek1();
+		//scheduleWeek2();
+		//scheduleWeek3();
+		//scheduleWeek4();
 
 	}
 
@@ -87,7 +88,7 @@ public class Listener implements ServletContextListener {
 
 			Timer time = new Timer();
 			time.schedule(new SurveyTask1(week1EndDate, "Take Survey A",
-					SurveyResource.SURVEYA), surveyTime, 24 * 60 * 60 * 1000);
+					AppResource.SURVEYA), surveyTime, 24 * 60 * 60 * 1000);
 
 			// Create a Date corresponding to 03:30:00 PM.
 
@@ -108,7 +109,7 @@ public class Listener implements ServletContextListener {
 			surveyTime = calendar.getTime();
 			time = new Timer();
 			time.schedule(new SurveyTask2(week1EndDate,
-					"Reminder to take Survey A", SurveyResource.SURVEYA_REM),
+					"Reminder to take Survey A", AppResource.SURVEYA_REM),
 					surveyTime, 24 * 60 * 60 * 1000); // Schedule at 3:30 pm
 
 			// Create a Date corresponding to 6:30:00 PM.
@@ -130,7 +131,7 @@ public class Listener implements ServletContextListener {
 			surveyTime = calendar.getTime();
 			time = new Timer();
 			time.schedule(new SurveyTask1(week1EndDate, "Take Survey B",
-					SurveyResource.SURVEYB), surveyTime, 24 * 60 * 60 * 1000); // Schedule
+					AppResource.SURVEYB), surveyTime, 24 * 60 * 60 * 1000); // Schedule
 																				// at
 																				// 6:30
 																				// pm
@@ -287,7 +288,7 @@ public class Listener implements ServletContextListener {
 			Date surveyTime = calendar.getTime();
 			Timer time = new Timer();
 			time.schedule(new SurveyTask1(week4EndDate, "Take Survey A",
-					SurveyResource.SURVEYA), surveyTime, 24 * 60 * 60 * 1000);
+					AppResource.SURVEYA), surveyTime, 24 * 60 * 60 * 1000);
 
 			// Create a Date corresponding to 03:30:00 PM.
 
@@ -308,7 +309,7 @@ public class Listener implements ServletContextListener {
 			surveyTime = calendar.getTime();
 			time = new Timer();
 			time.schedule(new SurveyTask2(week4EndDate,
-					"Reminder to take Survey A", SurveyResource.SURVEYA_REM),
+					"Reminder to take Survey A", AppResource.SURVEYA_REM),
 					surveyTime, 24 * 60 * 60 * 1000); // Schedule at 3:30 pm
 
 			// Create a Date corresponding to 6:30:00 PM.
@@ -330,7 +331,7 @@ public class Listener implements ServletContextListener {
 			surveyTime = calendar.getTime();
 			time = new Timer();
 			time.schedule(new SurveyTask1(week4EndDate, "Take Survey B",
-					SurveyResource.SURVEYB), surveyTime, 24 * 60 * 60 * 1000); // Schedule
+					AppResource.SURVEYB), surveyTime, 24 * 60 * 60 * 1000); // Schedule
 																				// at
 																				// 6:30
 																				// pm

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
-import com.sjhs.app.Resources.SurveyResource;
+import com.sjhs.app.Resources.AppResource;
 import com.sjhs.app.dbconnection.DBConnection;
 import com.sjhs.app.pns.PNS;
 
@@ -46,7 +46,7 @@ public class SurveyTask2 extends TimerTask {
 			DBConnection myDB = new DBConnection();
 			Connection conn = myDB.getDBConnection();
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, SurveyResource.SURVEYA);
+			ps.setString(1, AppResource.SURVEYA);
 			ps.setString(2, "1");
 			ResultSet rs = ps.executeQuery();
 
@@ -58,7 +58,7 @@ public class SurveyTask2 extends TimerTask {
 
 			// PNS
 			List<String> passedDevices = PNS.pushNotification(deviceTokens,
-					SurveyResource.SURVEYA, message);
+					AppResource.SURVEYA, message);
 			
 			Iterator<String> iter = passedDevices.iterator();
 			String deviceToken = null;

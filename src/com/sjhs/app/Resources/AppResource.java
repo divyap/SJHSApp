@@ -30,7 +30,7 @@ import com.sjhs.app.dbconnection.DBConnection;
  */
 
 @Path("/Survey")
-public class SurveyResource {
+public class AppResource {
 
 	public static final String SURVEYA = "SurveyA";
 	public static final String SURVEYB = "SurveyB";
@@ -143,6 +143,36 @@ public class SurveyResource {
 			e.printStackTrace();
 		}
 
+	}
+	
+	@GET
+	@Path("/testData")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getTestData() {
+		StringBuffer res = new StringBuffer("");
+		try {
+			String sql = "SELECT top 10 * FROM sjhsSSRS.dbo.SSRS_CPT_Dictionary";
+			String key;
+			int c = 0;
+			DBConnection myDB = new DBConnection();
+			Connection conn = myDB.getDBConnection();
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				if (c != 0)
+					res.append(", ");
+				key = rs.getString(1);
+				System.out.println("Intitution==>" + key);
+				c = c + 1;
+				res = res.append(key);
+			}
+			
+			myDB.closeConnection();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return res.toString();
 	}
 
 }

@@ -32,7 +32,7 @@ public class DBConnection {
 	public static final String DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	//public static String DRIVER = null;
 	
-	public static final String URL = "jdbc:sqlserver://scrdcvamgdat02:1433;databaseName=";
+	public static final String URL = "jdbc:sqlserver://AMGDAT002-VD:1433;databaseName=";
 	//public static String URL = null;
 	
 	public static final String DB_NAME = "sjhsSSRS";
