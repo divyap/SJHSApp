@@ -2,6 +2,7 @@ package com.sjhs.app.Resources;
 
 import java.io.ByteArrayInputStream;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -43,64 +44,44 @@ public class AppResource {
 	@GET
 	@Path("/login")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getUserSession(@QueryParam("userid") String userid) {
-
+	public boolean getUserSession(@QueryParam("userid") String userid, @QueryParam("pwd") String pwd) {
+        boolean result = false;
 		try
 	    {
 	        // Set up the environment for creating the initial context
 	        Hashtable<String, String> env = new Hashtable<String, String>();
 	        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-	        env.put(Context.PROVIDER_URL, "ldap://ldap_server:389");
-	        // 
+	        env.put(Context.PROVIDER_URL, "LDAP://SCR-WVS-SCDC01.stjoe.org");
 	        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-	        env.put(Context.SECURITY_PRINCIPAL, "domain\\user"); //we have 2 \\ because it's a escape char
-	        env.put(Context.SECURITY_CREDENTIALS, "test");
+	        env.put(Context.SECURITY_PRINCIPAL, "SJHS-NT\\"+userid); //we have 2 \\ because it's a escape char
+	        env.put(Context.SECURITY_CREDENTIALS, pwd);
 	
 	        // Create the initial context
 	
 	        DirContext ctx = new InitialDirContext(env);
-	        boolean result = ctx != null;
-	
-	        if(ctx != null)
-	            ctx.close();
-	
-	        return "true";
+	        
+	        if(ctx == null) {
+	        	System.out.print("LdapContext is null ==>" + ctx);
+	            result = false;
+	        	ctx.close();
+	        } else {
+	        	System.out.print("LdapContext is not null ==>" + ctx);
+	        	result = true;
+	        }
+	        System.out.print("user ==>" + userid + " is authenticated ..");
+
+	        // Close the context when we're done
+		    ctx.close();
+        
 	    }
-	    catch (Exception e)
+	    catch (NamingException e)
 	    {           
-	        return "false";
+	    	System.out.println("Lookup failed: " + e);
 	    }
+	    return result;
 	}
 	
 	
-	/*
-	@GET
-	@Path("/loginold")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getUserSession(@QueryParam("userid") String userid) {
-		System.out.println(userid);
-		String sql = "SELECT USER_ID FROM USER WHERE USER_ID = ?";
-		try {
-			DBConnection myDB = new DBConnection();
-			Connection conn = myDB.getDBConnection();
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, userid);
-			ResultSet rs = ps.executeQuery();
-
-			if (rs.next()) {
-				return "1";
-			}
-
-			return "0";
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "0";
-		}
-
-	}
-	
-	*/
-
 	@POST
 	@Path("/submitAnswers")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -129,31 +110,29 @@ public class AppResource {
 	}
 
 	@GET
-	@Path("/getSentSurvey")
+	@Path("/getPatientCensus")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getSentSurvey(@QueryParam("userid") String userid) {
+	public String getPatientCensus() {
 		StringBuffer res = new StringBuffer("");
-		SimpleDateFormat sdf1 = new SimpleDateFormat("MMM dd yyyy");
-		SimpleDateFormat sdf2 = new SimpleDateFormat("hh:mm a");
-
+		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd yyyy hh:mm a");
+		CallableStatement cs = null;
 		int c = 0;
-		String sql = "SELECT DATE , SURVEY_NAME FROM SURVEY_NOTIFICATION WHERE USER_ID = ?";
+		String sql = "{call sjhsSSRS.dbo.SJHSApp_Patient_Census}";
 		try {
 			DBConnection myDB = new DBConnection();
 			Connection conn = myDB.getDBConnection();
-			PreparedStatement psmt = conn.prepareStatement(sql);
-			psmt.setString(1, userid);
-			ResultSet rs = psmt.executeQuery();
+			cs = conn.prepareCall(sql);
+			ResultSet rs = cs.executeQuery();
 
 			while (rs.next()) {
 				if (c != 0)
 					res.append(", ");
-				Date date = rs.getDate("DATE");
-				Time time = rs.getTime("DATE");
-				String surveyName = rs.getString("SURVEY_NAME");
+				Date admitDtTm = rs.getDate("AdmitDtTm");
+				String institution = rs.getString("Institution");
+				int pt_count = rs.getInt("pt_count");
 				c = c + 1;
-				res = res.append(sdf1.format(date) + " " + sdf2.format(time)
-						+ " " + surveyName);
+				res = res.append(sdf.format(admitDtTm) + " " + institution
+						+ " " + pt_count);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -214,5 +193,15 @@ public class AppResource {
 		}
 		return res.toString();
 	}
-
+	
+	public static void main(String[] args) {
+		
+		AppResource res = new AppResource();
+		boolean result = res.getUserSession("prakashdi", "chintoo@3");
+		System.out.println("user authenticated? ==>" + result);
+		
+		String patCensus =  res.getPatientCensus();
+		System.out.println("Patient Census ==>" + patCensus);
+	}
+	
 }
