@@ -5,16 +5,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.Context;
 
-public class DBConnection {
+public class DBConnection { 
 	
 	public DBConnection(){
 		System.out.println("Constructor " + context); // null here
@@ -24,23 +20,23 @@ public class DBConnection {
 	private ServletContext context;
 	
 	public static final String USER_NAME = "sqlSSRS";
-	//public static String USER_NAME = null;
 	
 	public static final String PASSWORD = "$$r5sa";
-	//public static String PASSWORD = null ;
 	
 	public static final String DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	//public static String DRIVER = null;
 	
-	//Dev
+	//DEV
 	//public static final String URL = "jdbc:sqlserver://AMGDAT002-VD:1433;databaseName=";
 	
 	//UAT
 	public static final String URL = "jdbc:sqlserver://SCRDCVAMGDAT02:1433;databaseName=";
-	//public static String URL = null;
-	
+
+	//PROD
+	//public static final String URL = "jdbc:sqlserver://SCRDCPDAMGDAT2:1433;databaseName=";
+
 	public static final String DB_NAME = "sjhsSSRS";
-	//public static String DB_NAME = null;
+
 	
 	@Context
 	public void setServletContext(ServletContext context) {
