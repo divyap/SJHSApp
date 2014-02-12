@@ -1,6 +1,7 @@
 package com.sjhs.app.Resources;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import java.sql.Array;
 import java.sql.CallableStatement;
@@ -27,7 +28,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.Version;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.node.ObjectNode;
@@ -50,7 +53,7 @@ public class AppResource {
 
 	@GET
 	@Path("/login")
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String getUserSession(@QueryParam("userid") String userid, @QueryParam("pwd") String pwd) {
 		System.out.println("<============login API ==========>");
 		System.out.println("Userid===>" + userid);
@@ -103,7 +106,7 @@ public class AppResource {
         
 		    if(!result) {
 		    	userJSON.put("msg", "Lookup context is not found.");
-		    	userJSON.put("login", new Integer(logVal));
+		    	userJSON.put("login", null);
 		    } else {
 		    	//********User is authenticated ****************
 		    	System.out.print("user ==>" + userid + " is authenticated ..");
@@ -122,39 +125,111 @@ public class AppResource {
 					String ministry = rs.getString("Ministry");
 					minArray.add(ministry);
 				}
-				userJSON.put("ministry", minArray);
+				userJSON.put("ministryList", minArray);
 		    }
 		    jsonString = mapper.writeValueAsString(userJSON);
 	    } catch (NamingException ne)  {           
 	    	System.out.println("Lookup failed: " + ne);
 	    	String errMsg = "Login failed for " + userid + "!";
+	    	userJSON.put("userid", userid);
 	    	userJSON.put("msg", errMsg);
+	    	userJSON.put("login", null);
+	    	userJSON.put("ministryList", minArray);
+	    	try {
+				return mapper.writeValueAsString(userJSON);
+			} catch (JsonGenerationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	    } catch (Exception e) {
 	    	String errMsg = "Login failed for " + userid + "!";
+	    	userJSON.put("userid", userid);
 	    	userJSON.put("msg", errMsg);
+	    	userJSON.put("login", null);
+	    	userJSON.put("ministryList", minArray);
 	    	System.out.println("Lookup failed: " + e);
+	    	try {
+				return mapper.writeValueAsString(userJSON);
+			} catch (JsonGenerationException jge) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException jme) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException ioe) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	    }finally {
 			try {
 				if(rs!=null) {
 					rs.close();
 				}else { 
 					String errMsg = "ERROR: ResultSet is null!";
-					userJSON.put("msg", errMsg);
-					return "ERROR: ResultSet is null!";
+					userJSON.put("userid", userid);
+			    	userJSON.put("msg", errMsg);
+			    	userJSON.put("login", null);
+			    	userJSON.put("ministryList", minArray);
+					try {
+						return mapper.writeValueAsString(userJSON);
+					} catch (JsonGenerationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JsonMappingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					}
 				if(cs!=null) {
 					cs.close();
 				}else { 
 					String errMsg = "ERROR: CallableStatement is null!";
-					userJSON.put("msg", errMsg);
-					return "ERROR: CallableStatement is null!";
+					userJSON.put("userid", userid);
+			    	userJSON.put("msg", errMsg);
+			    	userJSON.put("login", null);
+			    	userJSON.put("ministryList", minArray);
+			    	try {
+						return mapper.writeValueAsString(userJSON);
+					} catch (JsonGenerationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JsonMappingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				if(conn!=null) {
 					myDB.closeConnection();
 				}else { 
 					String errMsg = "ERROR: Connection Object is null!";
-					userJSON.put("msg", errMsg);
-					return "ERROR: Connection Object is null!";
+					userJSON.put("userid", userid);
+			    	userJSON.put("msg", errMsg);
+			    	userJSON.put("login", null);
+			    	userJSON.put("ministryList", minArray);
+			    	try {
+						return mapper.writeValueAsString(userJSON);
+					} catch (JsonGenerationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JsonMappingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				
 			} catch (SQLException e) {
@@ -170,7 +245,7 @@ public class AppResource {
 	@SuppressWarnings("unchecked")
 	@GET
 	@Path("/getCensus")
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String getPatientCensus(@QueryParam("ministry") String ministry) {
 		System.out.println("<============getPatientCensus API ==========>");
 		System.out.println("ministry ===>" + ministry);
@@ -179,6 +254,7 @@ public class AppResource {
 		CallableStatement cs = null;
 		ResultSet rs = null;
 		ArrayList resultList = new ArrayList();
+		Map<String,Object> censusJSON = null;
 
 		//Create DBConnection
 		DBConnection myDB = new DBConnection();		
@@ -204,7 +280,7 @@ public class AppResource {
 				resultList.add(tempArr);
 			}
 
-			Map<String,Object> censusJSON = getCensusAllJSON(resultList);
+			censusJSON = getCensusAllJSON(resultList);
 			jsonString = mapper.writeValueAsString(censusJSON);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -212,14 +288,38 @@ public class AppResource {
 			try {
 				if(rs!=null) {
 					rs.close();
-				}else { return "ERROR: ResultSet is null!";}
-				if(cs!=null) {
+				}else { 
+					censusJSON = new HashMap<String, Object>();
+					censusJSON.put("errorMsg", "ERROR: ResultSet is null!");
+					jsonString = mapper.writeValueAsString(censusJSON);
+					return jsonString;
+				}
+				if(cs!= null) {
 					cs.close();
-				}else { return "ERROR: CallableStatement is null!";}
-				if(conn!=null) {
+				}else { 
+					censusJSON = new HashMap<String, Object>();
+					censusJSON.put("errorMsg", "ERROR: CallableStatement is null!");
+					jsonString = mapper.writeValueAsString(censusJSON);
+					return jsonString;
+				}
+				if(conn!= null) {
 					myDB.closeConnection();
-				}else { return "ERROR: Connection Object is null!";}
+				}else {
+					censusJSON = new HashMap<String, Object>();
+					censusJSON.put("errorMsg", "ERROR: Connection Object is null!");
+					jsonString = mapper.writeValueAsString(censusJSON);
+					return jsonString;
+				}
 			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonGenerationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -236,7 +336,7 @@ public class AppResource {
 		if(arr != null)
 			size = arr.size();
 		String ministry = null;
-		Map<String, Object> ministryMap = new HashMap<String, Object>();;
+		Map<String, Object> ministryMap = new HashMap<String, Object>();
 		Map<String, Object> dateMap = null;
 		Map<Integer, Integer> countMap = null;
 		for(int i=0; i <size; i++) {
@@ -245,13 +345,17 @@ public class AppResource {
 			System.out.println("iteration begins. Ministry Name ===>" + i + " " + ministry);
 			if(!ministryMap.containsKey(ministry)) {
 				System.out.println("Ministry does not exists in map ...>");
+				//Map<String, Object> mini_census = new HashMap<String, Object>();
+				//mini_census.put("ministry", ministry);
 				dateMap = new HashMap<String, Object>();
+				dateMap.put("ministry", ministry);
 				countMap = new HashMap<Integer, Integer>();
 				String admitDt = (String)tempArr1.get(1);
 				Integer admitHr = (Integer)tempArr1.get(2);
 				Integer pt_count = (Integer)tempArr1.get(3);
 				countMap.put(admitHr, pt_count);
-				dateMap.put(admitDt, countMap);
+				dateMap.put("day1", admitDt);
+				dateMap.put("day1census", countMap);
 				ministryMap.put(ministry, dateMap);
 				System.out.println("new Row added ==>" + ministry + " " + admitDt + " " + admitHr +" " + pt_count);
 				System.out.println("MinistryMap so far..==> " + ministryMap.toString() );
@@ -262,28 +366,34 @@ public class AppResource {
 				Integer admitHr = (Integer)tempArr1.get(2);
 				Integer pt_count = (Integer)tempArr1.get(3);
 				Map<String, Object> dateMap1 = (Map<String, Object>)ministryMap.get(ministry);
-				if(dateMap1.containsKey(admitDt)) {
-					Map<Integer, Integer> countMap1 = (Map<Integer, Integer>)dateMap1.get(admitDt);
-					if(!countMap1.containsKey(admitHr)) {
-						countMap1.put(admitHr, pt_count);
-						dateMap1.put(admitDt, countMap1);
-						ministryMap.put(ministry,dateMap1);
-						System.out.println("new count added to existing ministry-date ==>" + ministry + " " + admitDt + " " + admitHr +" " + pt_count);
-						System.out.println("MinistryMap so far.. ==> " + ministryMap.toString());
+				if(dateMap1.containsValue(admitDt)) {
+					if(dateMap1.containsKey("day1") &&
+							dateMap1.get("day1").equals(admitDt)) {
+						Map<Integer, Integer> countMap1 = (Map<Integer, Integer>)dateMap1.get("day1census");
+						if(!countMap1.containsKey(admitHr)) {
+							countMap1.put(admitHr, pt_count);
+							dateMap1.put("day1census", countMap1);
+							ministryMap.put(ministry,dateMap1);
+							System.out.println("new count added to existing ministry-date ==>" + ministry + " " + admitDt + " " + admitHr +" " + pt_count);
+							System.out.println("MinistryMap so far.. ==> " + ministryMap.toString());
+						}else {
+							System.out.println("AdmitHr is alreay present for minstry ==> " + ministry + " " + admitDt);
+						}
 					}else {
-						System.out.println("AdmitHr is alreay present for minstry ==> " + ministry + " " + admitDt);
+						countMap = new HashMap<Integer, Integer>();
+						countMap.put(admitHr, pt_count);
+						dateMap.put("day2", admitDt);
+						dateMap1.put("day2census", countMap);
+						//dateMap1.put(admitDt, countMap);
+						ministryMap.put(ministry, dateMap1);
+						System.out.println("new count and Date added to existing ministry ==>" + ministry + " " + admitDt + " " + admitHr +" " + pt_count);
+						System.out.println("minstryMap so far.. ==> " + ministryMap.toString());
 					}
-				}else {
-					countMap = new HashMap<Integer, Integer>();
-					countMap.put(admitHr, pt_count);
-					dateMap1.put(admitDt, countMap);
-					ministryMap.put(ministry, dateMap1);
-					System.out.println("new count and Date added to existing ministry ==>" + ministry + " " + admitDt + " " + admitHr +" " + pt_count);
-					System.out.println("minstryMap so far.. ==> " + ministryMap.toString());
 				}
 			}
 		}
 		censusJSON.put("census", ministryMap);
+		censusJSON.put("errorMsg", "Patient Census for " + ministry);
 		System.out.println("JSON String for census ===>" + censusJSON.toString());
 		return censusJSON;
 	}
@@ -291,15 +401,15 @@ public class AppResource {
 	@SuppressWarnings("unchecked")
 	@GET
 	@Path("/getCensusAll")
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String getPatientCensusAll() {
 		System.out.println("<============getPatientCensusAll API ==========>");
 		String jsonString = null;
-		StringBuffer res = new StringBuffer("");
 		
 		Connection conn = null;
 		CallableStatement cs = null;
 		ResultSet rs = null;
+		Map<String,Object> censusJSON = null;
 		
 		//Create DBConnection
 		DBConnection myDB = new DBConnection();		
@@ -328,7 +438,7 @@ public class AppResource {
 				tempArr.add(3, pt_count);
 				resultList.add(tempArr);
 			}
-			Map<String,Object> censusJSON = getCensusAllJSON(resultList);
+			censusJSON = getCensusAllJSON(resultList);
 			jsonString = mapper.writeValueAsString(censusJSON);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -336,14 +446,38 @@ public class AppResource {
 			try {
 				if(rs!=null) {
 					rs.close();
-				}else { return "ERROR: ResultSet is null!";}
+				}else { 
+					censusJSON = new HashMap<String, Object>();
+					censusJSON.put("errorMsg", "ERROR: ResultSet is null!");
+					jsonString = mapper.writeValueAsString(censusJSON);
+					return jsonString;
+				}
 				if(cs!=null) {
 					cs.close();
-				}else { return "ERROR: CallableStatement is null!";}
+				}else {
+					censusJSON = new HashMap<String, Object>();
+					censusJSON.put("errorMsg", "ERROR: CallableStatement is null!");
+					jsonString = mapper.writeValueAsString(censusJSON);
+					return jsonString;
+				}
 				if(conn!=null) {
 					myDB.closeConnection();
-				}else { return "ERROR: Connection Object is null!";}
+				}else {
+					censusJSON = new HashMap<String, Object>();
+					censusJSON.put("errorMsg", "ERROR: Connection Object is null!");
+					jsonString = mapper.writeValueAsString(censusJSON);
+					return jsonString;
+				}
 			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonGenerationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

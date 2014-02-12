@@ -1,10 +1,13 @@
 package com.sjhs.app.dbconnection;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -12,63 +15,54 @@ import javax.ws.rs.core.Context;
 
 public class DBConnection { 
 	
+	public static Properties properties = null;
+	
+	private Connection conn = null;
+	
+	private ServletContext context;
+	
+	public static String USER_NAME;
+	
+	public static String PASSWORD;
+	
+	public static String DRIVER;
+
+	public static String URL;
+
+	public static String DB_NAME;
+
 	public DBConnection(){
 		System.out.println("Constructor " + context); // null here
 	}
 	
-	private Connection conn = null;
-	private ServletContext context;
-	
-	public static final String USER_NAME = "sqlSSRS";
-	
-	public static final String PASSWORD = "$$r5sa";
-	
-	public static final String DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	//public static String DRIVER = null;
-	
-	//DEV
-	//public static final String URL = "jdbc:sqlserver://AMGDAT002-VD:1433;databaseName=";
-	
-	//UAT
-	public static final String URL = "jdbc:sqlserver://SCRDCVAMGDAT02:1433;databaseName=";
 
-	//PROD
-	//public static final String URL = "jdbc:sqlserver://SCRDCPDAMGDAT2:1433;databaseName=";
+	public static void loadProperties() throws IOException {
+        // Get the inputStream
+        InputStream inputStream = DBConnection.class.getClassLoader().getResourceAsStream("jdbc.properties");
 
-	public static final String DB_NAME = "sjhsSSRS";
+        properties = new Properties();
 
-	
-	@Context
-	public void setServletContext(ServletContext context) {
-        System.out.println("servlet context set here");
-        this.context = context;
-        System.out.println(context.getInitParameter("jdbc.user"));
+        System.out.println("InputStream is: " + inputStream);
+
+        // load the inputStream using the Properties
+        properties.load(inputStream);
+        // get the value of the property
+        USER_NAME = properties.getProperty("jdbc.user");
+        PASSWORD = properties.getProperty("jdbc.password");
+        DRIVER = properties.getProperty("jdbc.driver");
+        URL = properties.getProperty("jdbc.url");
+        DB_NAME = properties.getProperty("jdbc.database");
+        System.out.println("Property values are: " + USER_NAME + " " + PASSWORD + 
+        					" " + DRIVER+ " " + URL);
     }
 	
-	/*
-	@GET
-	private void setDBProperties() {
-		setServletContext(context);
-		System.out.println(context);
-		USER_NAME = context.getInitParameter("jdbc.user");
-		PASSWORD = context.getInitParameter("jdbc.password");
-		DRIVER = context.getInitParameter("jdbc.driver");
-		URL = context.getInitParameter("jdbc.url");
-		DB_NAME = context.getInitParameter("jdbc.database");
-
-       //get the property value and print it out
-        System.out.println(USER_NAME);
-        System.out.println(PASSWORD);
-        System.out.println(DRIVER);
-
-	}
-*/
 	 	
 	public Connection getDBConnection() {
 		// read properties and set the database parameters
 		//setDBProperties();
 		try {
 
+			loadProperties();
 			Class.forName(DRIVER);
 			//String url = URL + DB_NAME;
 			String url = URL + DB_NAME;
